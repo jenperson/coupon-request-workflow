@@ -24,7 +24,6 @@ from pydantic import BaseModel
 notion_connector = connector("notion")
 slack_connector = connector("slack")
 
-NOTION_DATABASE_ID = "3e66ba59a7fe80198192d4dedf512f80"
 
 # Tally field labels → Notion column names
 FIELD_MAP = {
@@ -113,11 +112,15 @@ async def create_notion_page(
 
     Returns the parsed response containing the new page URL.
     """
+    database_id = os.environ.get("NOTION_DATABASE_ID", "")
+    if not database_id:
+        raise ValueError("NOTION_DATABASE_ID environment variable is not set")
+
     response = await notion.call_tool(
         tool_name="notion-create-pages",
         arguments={
             "parent": {
-                "database_id": NOTION_DATABASE_ID,
+                "database_id": database_id,
             },
             "pages": [
                 {
